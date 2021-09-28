@@ -25,7 +25,7 @@ app.use('/api/player', playerRoutes);
 // Instantiate server/app with socket
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: process.env.FRONTEND_APP}
+    cors: { origin: process.env.FRONTEND_APP }
 });
 io.on('connection', (socket) => {
     console.log('a user connected');
