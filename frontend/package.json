@@ -9,8 +9,13 @@
     "start": "vue-cli-service serve"
   },
   "dependencies": {
+    "@kyvg/vue3-notification": "^2.3.4",
+    "@popperjs/core": "^2.10.2",
     "axios": "^0.21.4",
+    "bootstrap": "^5.1.1",
     "core-js": "^3.6.5",
+    "jquery": "^3.6.0",
+    "popper.js": "^1.16.1",
     "socket.io-client": "^4.2.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",

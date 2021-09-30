@@ -1,7 +1,7 @@
 let Entity = () => {
     let self = {
-        x: 500,
-        y: 350,
+        x: 750,
+        y: 400,
         spdX: 0,
         spdY: 0,
         id: ""

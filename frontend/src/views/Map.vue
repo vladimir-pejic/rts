@@ -1,21 +1,32 @@
 <template>
-    <div class="">
-        <canvas id="ctx" width="1000" height="700" style="border:1px solid #000000;"></canvas>
-        <div id="chat-text" style="width: 1000px; height: 100px; overflow-y:scroll">
-            <div v-for="(chatMessage, chatKey ) in chatMessages" :key="chatKey">{{ chatMessage }}</div>
+    <div class="row">
+        <div class="col-10">
+            <canvas id="ctx" width="1500" height="800" class="canvas-game"></canvas>
         </div>
-        <input id="chat-input" type="text"
-               style="width: 1000px; font-size: 20px;"
-               v-model="newMessage"
-               @focus="chatActive = !chatActive"
-               @blur="chatActive = !chatActive"
-               v-on:keyup.enter="sendMessage()">
+
+        <div class="col-2">
+            <div class="row">
+                <div class="col-12 chat-box" id="chat-box">
+                    <p v-for="(chatMessage, chatKey ) in chatMessages" :key="chatKey">{{ chatMessage }}</p>
+                </div>
+                <div class="col-12">
+                    <input type="text"
+                           class="form-control"
+                           style="font-size: 16px;"
+                           v-model="newMessage"
+                           @focus="chatActive = !chatActive"
+                           @blur="chatActive = !chatActive"
+                           v-on:keyup.enter="sendMessage()">
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
 
 <script>
-import * as io from 'socket.io-client'
+import * as io from 'socket.io-client';
 
 export default {
     mounted() {
@@ -37,20 +48,30 @@ export default {
     },
     methods: {
         sendMessage() {
-            if(this.newMessage[0] === '/' && this.newMessage === '')
-                this.socket.emit('evalServer', this.newMessage.slice(1));
-            else
+            if(this.newMessage[0] === '/' || this.newMessage === '') {
+                this.$notify({
+                    type: 'error',
+                    title: 'Error',
+                    text: 'You must enter a message to send!'
+                });
+            } else {
                 this.socket.emit('sendMsgToServer', this.newMessage);
+            }
             this.newMessage = '';
         },
         receiveMessage() {
             let self = this;
             this.socket.on('addToChat',function(data) {
                 self.chatMessages.push(data);
+                self.autoScroll();
             });
             this.socket.on('evalAnswer',function(data){
                 console.log(data);
             });
+        },
+        autoScroll() {
+            let elem = document.getElementById('chat-box');
+            elem.scrollTop = elem.scrollHeight;
         },
         controls() {
             let ctx = document.getElementById("ctx").getContext("2d");
@@ -59,7 +80,7 @@ export default {
             let self = this;
 
             self.socket.on('newPositions', function (data) {
-                ctx.clearRect(0, 0, 1000, 700);
+                ctx.clearRect(0, 0, 1500, 800);
                 for(let i = 0 ; i < data.player.length; i++)
                     ctx.fillText(data.player[i].number,data.player[i].x,data.player[i].y);
 
@@ -92,3 +113,15 @@ export default {
     }
 }
 </script>
+
+<style>
+.canvas-game {
+    border:1px solid #000000;
+}
+.chat-box {
+    background-color: aliceblue;
+    overflow-y: scroll;
+    height: 85vh;
+    text-align: left;
+}
+</style>
