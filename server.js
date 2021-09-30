@@ -7,6 +7,8 @@ import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 import { Server } from 'socket.io';
 import authRoutes from './routes/authRoutes.js';
 import playerRoutes from './routes/playerRoutes.js';
+import Player from './entities/Player.js';
+import Bullet from './entities/Bullet.js';
 
 dotenv.config();
 connectDB();
@@ -21,18 +23,37 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/player', playerRoutes);
 
+let SOCKET_LIST = {};
 
 // Instantiate server/app with socket
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: process.env.FRONTEND_APP }
 });
-io.on('connection', (socket) => {
-    console.log('a user connected');
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
+
+io.sockets.on('connection', function(socket){
+    socket.id = Math.random();
+    SOCKET_LIST[socket.id] = socket;
+
+    Player.onConnect(socket);
+
+    socket.on('disconnect',function(){
+        delete SOCKET_LIST[socket.id];
+        Player.onDisconnect(socket);
     });
 });
+
+setInterval(function(){
+    let pack = {
+        player:Player.update(),
+        bullet:Bullet.update(),
+    }
+
+    for(let i in SOCKET_LIST){
+        let socket = SOCKET_LIST[i];
+        socket.emit('newPositions',pack);
+    }
+},1000/25);
 
 // Middlewares
 app.use(notFound);

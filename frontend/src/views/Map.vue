@@ -30,8 +30,11 @@ export default {
 
             self.socket.on('newPositions', function (data) {
                 ctx.clearRect(0, 0, 1000, 700);
-                for (let i = 0; i < data.length; i++)
-                    ctx.fillText(data[i].number, data[i].x, data[i].y);
+                for(let i = 0 ; i < data.player.length; i++)
+                    ctx.fillText(data.player[i].number,data.player[i].x,data.player[i].y);
+
+                for(let i = 0 ; i < data.bullet.length; i++)
+                    ctx.fillRect(data.bullet[i].x-5,data.bullet[i].y-5,5,5);
             });
 
             document.onkeydown = function (event) {
