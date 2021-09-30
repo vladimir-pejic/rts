@@ -24,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/player', playerRoutes);
 
 let SOCKET_LIST = {};
+let DEBUG = true;
 
 // Instantiate server/app with socket
 const server = http.createServer(app);
@@ -40,6 +41,20 @@ io.sockets.on('connection', function(socket){
     socket.on('disconnect',function(){
         delete SOCKET_LIST[socket.id];
         Player.onDisconnect(socket);
+    });
+
+    socket.on('sendMsgToServer',function(data){
+        let playerName = ("" + socket.id).slice(2,7);
+        for(let i in SOCKET_LIST){
+            SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
+        }
+    });
+
+    socket.on('evalServer',function(data){
+        if(!DEBUG)
+            return;
+        let res = eval(data);
+        socket.emit('evalAnswer',res);
     });
 });
 
