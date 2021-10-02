@@ -30,7 +30,7 @@ import * as io from 'socket.io-client';
 
 export default {
     mounted() {
-        if(this.socket) {
+        if (this.socket) {
             this.controls();
             this.receiveMessage();
         }
@@ -48,7 +48,7 @@ export default {
     },
     methods: {
         sendMessage() {
-            if(this.newMessage[0] === '/' || this.newMessage === '') {
+            if (this.newMessage[0] === '/' || this.newMessage === '') {
                 this.$notify({
                     type: 'error',
                     title: 'Error',
@@ -61,11 +61,11 @@ export default {
         },
         receiveMessage() {
             let self = this;
-            this.socket.on('addToChat',function(data) {
+            this.socket.on('addToChat', function (data) {
                 self.chatMessages.push(data);
                 self.autoScroll();
             });
-            this.socket.on('evalAnswer',function(data){
+            this.socket.on('evalAnswer', function (data) {
                 console.log(data);
             });
         },
@@ -81,11 +81,11 @@ export default {
 
             self.socket.on('newPositions', function (data) {
                 ctx.clearRect(0, 0, 1500, 800);
-                for(let i = 0 ; i < data.player.length; i++)
-                    ctx.fillText(data.player[i].number,data.player[i].x,data.player[i].y);
+                for (let i = 0; i < data.player.length; i++)
+                    ctx.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
 
-                for(let i = 0 ; i < data.bullet.length; i++)
-                    ctx.fillRect(data.bullet[i].x-5,data.bullet[i].y-5,5,5);
+                for (let i = 0; i < data.bullet.length; i++)
+                    ctx.fillRect(data.bullet[i].x - 5, data.bullet[i].y - 5, 5, 5);
             });
 
             document.onkeydown = function (event) {
@@ -109,6 +109,19 @@ export default {
                 else if (event.keyCode === 87 && !self.chatActive) // w
                     self.socket.emit('keyPress', {inputId: 'up', state: false});
             }
+
+            document.onmousedown = function () {
+                self.socket.emit('keyPress', {inputId: 'attack', state: true});
+            }
+            document.onmouseup = function () {
+                self.socket.emit('keyPress', {inputId: 'attack', state: false});
+            }
+            document.onmousemove = function (event) {
+                let x = -750 + event.clientX - 8;
+                let y = -400 + event.clientY - 8;
+                let angle = Math.atan2(y, x) / Math.PI * 180;
+                self.socket.emit('keyPress', {inputId: 'mouseAngle', state: angle});
+            }
         }
     }
 }
@@ -116,8 +129,9 @@ export default {
 
 <style>
 .canvas-game {
-    border:1px solid #000000;
+    border: 1px solid #000000;
 }
+
 .chat-box {
     background-color: aliceblue;
     overflow-y: scroll;

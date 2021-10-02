@@ -1,4 +1,5 @@
 import Entity from './Entity.js';
+import Bullet from './Bullet.js';
 
 let Player = (id) => {
     let self = Entity();
@@ -8,12 +9,24 @@ let Player = (id) => {
     self.pressingLeft = false;
     self.pressingUp = false;
     self.pressingDown = false;
+    self.pressingAttack = false;
+    self.mouseAngle = 0;
     self.maxSpd = 10;
 
     let super_update = self.update;
     self.update = () => {
         self.updateSpd();
         super_update();
+
+        if(self.pressingAttack){
+            self.shootBullet(self.mouseAngle);
+        }
+    }
+
+    self.shootBullet = function(angle){
+        let b = Bullet(self.id,angle);
+        b.x = self.x;
+        b.y = self.y;
     }
 
     self.updateSpd = function () {
@@ -47,6 +60,10 @@ Player.onConnect = function (socket) {
             player.pressingUp = data.state;
         else if (data.inputId === 'down')
             player.pressingDown = data.state;
+        else if(data.inputId === 'attack')
+            player.pressingAttack = data.state;
+        else if(data.inputId === 'mouseAngle')
+            player.mouseAngle = data.state;
     });
 }
 Player.onDisconnect = function (socket) {
